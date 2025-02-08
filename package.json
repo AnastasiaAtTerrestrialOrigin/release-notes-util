@@ -12,7 +12,8 @@
     "electron": "electron . --enable-logging",
     "build-electron": "tsc -b && BUILD_TARGET=electron vite build && tsc -b tsconfig.electron.json --clean && tsc -b tsconfig.electron.json",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest"
   },
   "dependencies": {
     "@capacitor/android": "^7.0.1",
@@ -25,6 +26,8 @@
   "devDependencies": {
     "@capacitor/cli": "^7.0.1",
     "@eslint/js": "^9.19.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react-swc": "^3.5.0",
@@ -33,8 +36,10 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
     "globals": "^15.14.0",
+    "jsdom": "^26.0.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.22.0",
-    "vite": "^6.1.0"
+    "vite": "^6.1.0",
+    "vitest": "^3.0.5"
   }
 }
