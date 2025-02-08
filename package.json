@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "main": "dist/electronMain.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "build-web": "tsc -b && vite build",
