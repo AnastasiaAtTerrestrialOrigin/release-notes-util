@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import Page1 from './Page1';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,10 +8,14 @@ const PAGE_PATH = '/page2';
 export function Page2() {
     const navigate = useNavigate();
 
+    const handleClick = useCallback(() => {
+        navigate(Page1.path);
+    }, [navigate]);
+
     return (
     <div>
         <h1>{PAGE_NAME}</h1>
-        <button onClick={() => navigate(Page1.path)}>Go to Page1</button>
+        <button onClick={handleClick}>Go to Page1</button>
     </div>
     );
 }
