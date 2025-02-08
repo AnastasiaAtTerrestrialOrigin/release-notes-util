@@ -12,16 +12,36 @@
     "build-web": "tsc -b && vite build",
     "build-android": "npx cap sync android && npx cap open android",
     "build-ios": "npx cap sync ios && npx cap open ios",
+    "build-electron-linux": "tsc -b && BUILD_TARGET=electron vite build && tsc -b tsconfig.electron.json && npx electron-builder --linux",
     "electron": "electron . --enable-logging",
-    "build-electron": "tsc -b && BUILD_TARGET=electron vite build && tsc -b tsconfig.electron.json --clean && tsc -b tsconfig.electron.json",
+    "dev-electron": "tsc -b && BUILD_TARGET=electron vite build && tsc -b tsconfig.electron.json && electron . --enable-logging",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest"
   },
+  "build": {
+    "appId": "com.terrestrialorigin.releasenotesutil",
+    "productName": "Release Notes Util",
+    "files": [
+      "dist/**/*",
+      "src/electronMain.js"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility"
+    }
+  },
   "dependencies": {
+    "@capacitor-community/http": "^1.4.1",
     "@capacitor/android": "^7.0.1",
     "@capacitor/core": "^7.0.1",
     "@capacitor/ios": "^7.0.1",
+    "axios": "^1.7.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.5"
@@ -36,6 +56,7 @@
     "@typescript-eslint/eslint-plugin": "^8.23.0",
     "@vitejs/plugin-react-swc": "^3.7.2",
     "electron": "^34.1.1",
+    "electron-builder": "^25.1.8",
     "eslint": "^9.20.0",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.0.0",

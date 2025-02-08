@@ -8,6 +8,16 @@ const isElectron = process.env.BUILD_TARGET === 'electron';
 export default defineConfig({
   base: isElectron ? './' : '/', // Use a relative base for Electron, absolute for Capacitor
   plugins: [react()],
+  server: {
+    proxy: {
+      '/jira': {
+        target: 'https://terrestrialorigin.atlassian.net',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/jira/, '')
+      }
+    }
+  },
   test: {
     globals: true,
     environment: 'jsdom',
