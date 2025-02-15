@@ -62,6 +62,12 @@ export function Page1() {
         <div>
             <label>Node: </label>
             <span>{testVar || 'N/A'}</span>
+            <button onClick={() => {
+                const bridge = (window as any).fileAPI;
+                bridge.deleteJSON('some/folder/myJson.json').then((_: boolean) => {
+                    console.log('deleted');
+                });
+            }}>Delete</button>
         </div>
         <div>
             <label>Jira URL: </label>

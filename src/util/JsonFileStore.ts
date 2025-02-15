@@ -17,6 +17,13 @@ interface FileAPI {
    * @returns A promise that resolves with true if saving was successful.
    */
   saveJSON: (filePath: string, data: any) => Promise<boolean>;
+
+  /**
+   * Deletes a JSON file at the given file path.
+   * @param filePath The path to the JSON file to delete.
+   * @returns A promise that resolves with true if deletion was successful.
+   */
+  deleteJSON: (filePath: string) => Promise<boolean>;
 }
 
 export const fileAPI: FileAPI = {
@@ -63,6 +70,15 @@ export const fileAPI: FileAPI = {
         }
       }
       throw new Error(`Failed to write JSON file at ${filePath}: ${error}`);
+    }
+  },
+
+  deleteJSON: async (filePath: string): Promise<boolean> => {
+    try {
+      await fs.unlink(filePath);
+      return true;
+    } catch (error) {
+      throw new Error(`Failed to delete JSON file at ${filePath}: ${error}`);
     }
   },
 };
