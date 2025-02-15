@@ -22,7 +22,7 @@ export function Page1() {
     useEffect(() => {
         const bridge = (window as any).fileAPI;
         if(bridge) {
-        const myJson = {name: "Mike", age: 30};
+        const myJson = {name: "amanda", age: 30};
         bridge.saveJSON('some/folder/myJson.json', myJson).then((result: boolean) => {
             console.log(result);
             bridge.readJSON('some/folder/myJson.json').then((result: any) => {
