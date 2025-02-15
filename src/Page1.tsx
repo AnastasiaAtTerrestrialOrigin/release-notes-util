@@ -39,9 +39,15 @@ export function Page1() {
         navigate(Page2.path);
     }, [navigate]);
 
+    const versionsInfo = (window as any).versions;
+
     return (
     <div>
         <h1>{PAGE_NAME}</h1>
+        <div>
+            <label>Node: </label>
+            <span>{versionsInfo?.node() || 'N/A'}</span>
+        </div>
         <div>
             <label>Jira URL: </label>
             <input type="text" value={jiraAuth.jiraBaseUrl} onChange={(e) => setJiraAuth({...jiraAuth, jiraBaseUrl: e.target.value})} />

@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "main": "dist-electron/electronMain.js",
+  "main": "dist-electron/electronMain.cjs",
   "files": [
     "dist"
   ],
@@ -12,9 +12,9 @@
     "build-web": "tsc -b && vite build",
     "build-android": "npx cap sync android && npx cap open android",
     "build-ios": "npx cap sync ios && npx cap open ios",
-    "build-electron-linux": "tsc -b && BUILD_TARGET=electron vite build && tsc -b tsconfig.electron.json && npx electron-builder --linux",
+    "build-electron-linux": "tsc -b && BUILD_TARGET=electron vite build && tsc -b tsconfig.electron.json && mv dist-electron/electronMain.js dist-electron/electronMain.cjs && mv dist-electron/preload.js dist-electron/preload.cjs && npx electron-builder --linux",
     "electron": "electron . --enable-logging",
-    "dev-electron": "tsc -b && BUILD_TARGET=electron vite build && tsc -b tsconfig.electron.json && electron . --enable-logging",
+    "dev-electron": "tsc -b && BUILD_TARGET=electron vite build && tsc -b tsconfig.electron.json && mv dist-electron/electronMain.js dist-electron/electronMain.cjs && mv dist-electron/preload.js dist-electron/preload.cjs && electron . --enable-logging",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
