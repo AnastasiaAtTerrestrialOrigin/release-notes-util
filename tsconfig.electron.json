@@ -9,7 +9,8 @@
         "noEmit": false,
         "strict": true,
         "outDir": "dist-electron",
-        "module": "commonjs"
+        "module": "CommonJS",
+        "esModuleInterop": true
     },
     "include": [
         "src/electronMain.ts",
