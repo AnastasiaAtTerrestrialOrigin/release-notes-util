@@ -8,7 +8,7 @@
         "moduleResolution": "node",
         "noEmit": false,
         "strict": true,
-        "outDir": "dist",
+        "outDir": "dist-electron",
     },
     "include": [
         "src/electronMain.ts"

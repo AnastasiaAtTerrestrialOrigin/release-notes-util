@@ -26,3 +26,5 @@ dist-ssr
 # Mobile generated folders
 android
 ios
+
+dist-electron

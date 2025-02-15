@@ -7,6 +7,9 @@ const isElectron = process.env.BUILD_TARGET === 'electron';
 // https://vite.dev/config/
 export default defineConfig({
   base: isElectron ? './' : '/', // Use a relative base for Electron, absolute for Capacitor
+  build: {
+    outDir: isElectron ? 'dist-electron' : 'dist',
+  },
   plugins: [react()],
   server: {
     proxy: {

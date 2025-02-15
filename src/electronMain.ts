@@ -2,7 +2,7 @@ import { app, BrowserWindow	} from 'electron';
 
 const WINDOW_WIDTH_DEFAULT = 800;
 const WINDOW_HEIGHT_DEFAULT = 600;
-const ENTRY_POINT = 'dist/index.html';
+const ENTRY_POINT = 'dist-electron/index.html';
 
 const createWindow = () => {
 	const win =	new	BrowserWindow({
