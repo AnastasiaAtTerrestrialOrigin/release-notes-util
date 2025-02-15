@@ -11,12 +11,25 @@ export function Page1() {
     const [tickets, setTickets] = useState<any[]>([]);
     const [fixVersion, setFixVersion] = useState<string>('');
     const [projectKey, setProjectKey] = useState<string>('');
+    const [testVar, setTestVar] = useState<string>('');
     const [error, setError] = useState<string>('');
     const [jiraAuth, setJiraAuth] = useStorage<JiraAuth>(LOCAL_STORAGE, 'jiraAuth', {
         jiraBaseUrl: '',
         username: '',
         apiToken: ''
     });
+
+    useEffect(() => {
+        const bridge = (window as any).fileAPI;
+        const myJson = {name: "Fyodor", age: 30};
+        bridge.saveJSON('myJson.json', myJson).then((result: boolean) => {
+            console.log(result);
+            bridge.readJSON('myJson.json').then((result: any) => {
+                console.log(result);
+                setTestVar(result.name);
+            });
+        });
+    }, []);
 
     const navigate = useNavigate();
     const jiraClientRef = useRef<JiraClient>(new JiraClient(jiraAuth));
@@ -39,14 +52,12 @@ export function Page1() {
         navigate(Page2.path);
     }, [navigate]);
 
-    const versionsInfo = (window as any).versions;
-
     return (
     <div>
         <h1>{PAGE_NAME}</h1>
         <div>
             <label>Node: </label>
-            <span>{versionsInfo?.node() || 'N/A'}</span>
+            <span>{testVar || 'N/A'}</span>
         </div>
         <div>
             <label>Jira URL: </label>
