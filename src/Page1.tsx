@@ -22,10 +22,10 @@ export function Page1() {
     useEffect(() => {
         const bridge = (window as any).fileAPI;
         if(bridge) {
-        const myJson = {name: "Fyodor", age: 30};
-        bridge.saveJSON('myJson.json', myJson).then((result: boolean) => {
+        const myJson = {name: "Mike", age: 30};
+        bridge.saveJSON('some/folder/myJson.json', myJson).then((result: boolean) => {
             console.log(result);
-            bridge.readJSON('myJson.json').then((result: any) => {
+            bridge.readJSON('some/folder/myJson.json').then((result: any) => {
                 console.log(result);
                     setTestVar(result.name);
                 });
