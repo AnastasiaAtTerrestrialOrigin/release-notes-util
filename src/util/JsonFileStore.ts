@@ -50,38 +50,32 @@ interface FileAPI {
 }
 
 export const fileAPI: FileAPI = {
-  // Async implementations
   readJSON: async (filePath: string): Promise<any> => {
     try {
       const data = await fsAsync.readFile(filePath, 'utf-8');
       return JSON.parse(data);
     } catch (error) {
-      // Optionally, log the error or handle it accordingly
       throw new Error(`Failed to read JSON file at ${filePath}: ${error}`);
     }
   },
 
   saveJSON: async (filePath: string, data: any): Promise<boolean> => {
-    let tmpFile = '';  // Initialize with empty string
+    let tmpFile = ''; 
     try {
       const jsonStr = JSON.stringify(data, null, 2);
       
-      // Create directory path if it doesn't exist
       const dirPath = path.dirname(filePath);
       if (dirPath) {
         await fsAsync.mkdir(dirPath, { recursive: true });
       }
 
-      // Create a temporary file in the same directory
       tmpFile = path.join(
         path.dirname(filePath),
         `.${path.basename(filePath)}.${crypto.randomBytes(6).toString('hex')}.tmp`
       );
 
-      // Write to temporary file
       await fsAsync.writeFile(tmpFile, jsonStr, 'utf-8');
       
-      // Atomically rename temporary file to target file
       await fsAsync.rename(tmpFile, filePath);
       
       return true;
@@ -106,7 +100,6 @@ export const fileAPI: FileAPI = {
     }
   },
 
-  // Sync implementations
   readJSONSync: (filePath: string): any => {
     try {
       const data = fs.readFileSync(filePath, 'utf-8');

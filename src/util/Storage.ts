@@ -19,6 +19,12 @@ export interface IStorage {
    * @param value The value to store (will be stringified).
    */
   storageSet<T>(key: string, value: T): void;
+
+  /**
+   * Deletes a value stored under a given key.
+   * @param key The key of the value to delete.
+   */
+  storageDelete(key: string): void;
 }
 
 /**
@@ -49,6 +55,18 @@ export const LOCAL_STORAGE: IStorage = {
     } catch (error) {
       console.error(`Error setting localStorage key "${key}":`, error);
     }
+  },
+
+  storageDelete(key: string): void {
+    if (typeof window === 'undefined') {
+      console.warn(`Can't access localStorage. Not in a browser environment.`);
+      return;
+    }
+    try {
+      window.localStorage.removeItem(key);
+    } catch (error) {
+      console.error(`Error deleting localStorage key "${key}":`, error);
+    }
   }
 };
 
@@ -65,9 +83,9 @@ export const ELECTRON_KEY_VALUE_STORAGE: IStorage | any = {
     
     try {
       const keyValuePairs = theWindow.fileAPI.readJSONSync(this.FILE_NAME);
-      console.log(`Read in the json file: ${(keyValuePairs ? JSON.stringify(keyValuePairs) : 'null')}`);
+      console.debug(`Read in the json file: ${(keyValuePairs ? JSON.stringify(keyValuePairs) : 'null')}`);
       const returnValue = keyValuePairs ? keyValuePairs[key] : null;
-      console.log(`Returning: ${(returnValue ? JSON.stringify(returnValue) : 'null')}`);
+      console.debug(`Returning: ${(returnValue ? JSON.stringify(returnValue) : 'null')}`);
       return returnValue;
     } catch (error) {
       console.error(`Error reading fileAPI key "${key}":`, error);
@@ -85,11 +103,42 @@ export const ELECTRON_KEY_VALUE_STORAGE: IStorage | any = {
     }
     
     try {
-      keyValuePairs = theWindow.fileAPI.readJSONSync(this.FILE_NAME) || {};
+      // read in existing key value pairs
+      try {
+        keyValuePairs = theWindow.fileAPI.readJSONSync(this.FILE_NAME) || {};
+        console.debug(`Read in the json file: ${(keyValuePairs ? JSON.stringify(keyValuePairs) : 'null')}`);
+      } catch (error) {
+        console.info(`"${this.FILE_NAME}" didn't exist. Will create a new one.`, error);
+        keyValuePairs = {};
+      }
+      // update with the new value
       keyValuePairs[key] = value;
+      // save the key value pairs
       theWindow.fileAPI.saveJSONSync(this.FILE_NAME, keyValuePairs);
+      console.debug(`Saved the json file: ${(keyValuePairs ? JSON.stringify(keyValuePairs) : 'null')}`);
     } catch (error) {
       console.error(`Error saving fileAPI key "${key}":`, error);
+    }
+  },
+
+  storageDelete(key: string): void {
+    const theWindow = window as any;
+
+    if(typeof theWindow === 'undefined' || !theWindow.fileAPI) {
+      console.warn(`Can't access fileAPI. Not in a electron environment.`);
+      return;
+    }
+    
+    try {
+      const keyValuePairs = theWindow.fileAPI.readJSONSync(this.FILE_NAME) || {};
+      console.debug(`Read in the json file: ${(keyValuePairs ? JSON.stringify(keyValuePairs) : 'null')}`);
+      if (key in keyValuePairs) {
+        delete keyValuePairs[key];
+        theWindow.fileAPI.saveJSONSync(this.FILE_NAME, keyValuePairs);
+        console.debug(`Deleted key "${key}" from json file`);
+      }
+    } catch (error) {
+      console.error(`Error deleting fileAPI key "${key}":`, error);
     }
   }
 };
@@ -121,6 +170,18 @@ export const SESSION_STORAGE: IStorage = {
       window.sessionStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
       console.error(`Error setting sessionStorage key "${key}":`, error);
+    }
+  },
+
+  storageDelete(key: string): void {
+    if (typeof window === 'undefined') {
+      console.warn(`Can't access sessionStorage. Not in a browser environment.`);
+      return;
+    }
+    try {
+      window.sessionStorage.removeItem(key);
+    } catch (error) {
+      console.error(`Error deleting sessionStorage key "${key}":`, error);
     }
   }
 };

@@ -1,6 +1,8 @@
 import { Http } from '@capacitor-community/http';
 import { JiraAuth } from './JiraAuth';
-
+import { Project } from './Project';
+import { Version } from './Version';
+import { Issue } from './Issue';
 // Use the proxy '/jira' during development (Vite sets import.meta.env.DEV)
 // and the real URL in production (or a native environment)
 // const isDev = import.meta.env.DEV;
@@ -14,12 +16,58 @@ export class JiraClient {
         this.jiraAuth = jiraAuth;
     }
 
-    async getTickets(fixVersion: string) {
+    async getProjects(): Promise<Project[]> {
+        const url = `${this.jiraAuth.jiraBaseUrl}/rest/api/2/project`;
+        try {
+            const response = await Http.get({
+                url,
+                headers: {
+                    Authorization: 'Basic ' + btoa(`${this.jiraAuth.username}:${this.jiraAuth.apiToken}`)
+                }
+            });
+            
+            return response.data as Project[];
+        } catch (error) {
+            console.error("Error getting projects:", error);
+            return [];
+        }
+    }
+
+    async getVersions(projectKey: string): Promise<Version[]> {
+        const url = `${this.jiraAuth.jiraBaseUrl}/rest/api/2/project/${projectKey}/versions`;
+        try {
+            const response = await Http.get({
+                url,
+                headers: {
+                    Authorization: 'Basic ' + btoa(`${this.jiraAuth.username}:${this.jiraAuth.apiToken}`)
+                }
+            });
+            
+            return response.data
+                .filter((version: any) => !version.archived)
+                .map((version: any): Version => ({
+                    id: version.id,
+                    name: version.name,
+                    released: version.released,
+                    releaseDate: version.releaseDate
+                }))
+                .sort((a: Version, b: Version) => {
+                    // Sort by release date descending (newest first)
+                    if (!a.releaseDate) return -1;
+                    if (!b.releaseDate) return 1;
+                    return new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime();
+                });
+        } catch (error) {
+            console.error("Error getting versions:", error);
+            return [];
+        }
+    }
+
+    async getTickets(fixVersion: string): Promise<Issue[]> {
         const jql = `project = ${projectKey} AND status = Done AND fixVersion = "${fixVersion}"`;
         console.log(`JQL: ${jql}`);
         const url = `${this.jiraAuth.jiraBaseUrl}/rest/api/2/search`;
         console.log(`URL: ${url}`);
-        const tickets: any[] = [];
         try {
             const response = await Http.get({
                 url,
@@ -32,19 +80,14 @@ export class JiraClient {
                 }
             });
             console.log(`Response: ${JSON.stringify(response)}`);
-            response.data.issues.forEach((issue: any) => {
-                const type = issue.fields.issuetype.name.toLowerCase();
-                if (type === 'task') return;
-                let label = ''; 
-                if (type === 'bug') label = ' (bug fix)';
-                else if (type === 'story') label = ' (enhancement)';
-                tickets.push({ key: issue.key, summary: issue.fields.summary + label });
-            });
-            return tickets;
+            const issues: Issue[] = response.data.issues;
+            console.log(`______________________________ Issues: ${JSON.stringify(issues)} ______________________________`);
+            return issues.filter(issue => issue.fields.issuetype.name.toLowerCase() !== 'task');
         } catch (error) {
             console.error("Error getting tickets:", error);
+            return [];
         }
-    }// end getTickets
-}// end JiraClient
+    }
+}
 
 export default JiraClient;
