@@ -8,8 +8,11 @@ import { environmentCheck } from './util/EnvironmentHelper';
 import { Project } from './jiraint/Project';
 import Version from './jiraint/Version';
 import { Issue } from './jiraint/Issue';
-const PAGE_NAME = 'Page1';
+
+const PAGE_NAME = 'Jira Ticket Search';
 const PAGE_PATH = '/page1';
+
+import './theme.css';
 
 export function Page1() {
     const [tickets, setTickets] = useState<Issue[]>([]);
@@ -20,6 +23,7 @@ export function Page1() {
     const [jiraVersionsFiltered, setJiraVersionsFiltered] = useState<Version[]>([]);
     const [unreleasedOnly, setUnreleasedOnly] = useState<boolean>(true);
     const [showTicketNumber, setShowTicketNumber] = useState<boolean>(true);
+    const [authSectionExpanded, setAuthSectionExpanded] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
     const [jiraAuth, setJiraAuth] = useStorage<JiraAuth>(environmentCheck.isElectron ? ELECTRON_KEY_VALUE_STORAGE : LOCAL_STORAGE, 'jiraAuth', {
         jiraBaseUrl: '',
@@ -33,7 +37,6 @@ export function Page1() {
         if(jiraAuth) {
             const jiraClient = new JiraClient(jiraAuth);
             jiraClient.getProjects().then((projects) => {
-                console.log(`projects: ${JSON.stringify(projects)}`);
                 setJiraProjects(projects);
             });
         }
@@ -42,8 +45,7 @@ export function Page1() {
     useEffect(() => {
         if(jiraProjects && projectKey) {
             const jiraClient = new JiraClient(jiraAuth);
-            jiraClient.getVersions(projectKey).then((versions) => {    
-                console.log(`versions: ${JSON.stringify(versions)}`);
+            jiraClient.getVersions(projectKey).then((versions) => {   
                 setJiraVersionsAll(versions);
             });
         }
@@ -85,43 +87,51 @@ export function Page1() {
     }, [navigate]);
 
     return (
-    <div>
+    <div className="container">
         <h1>{PAGE_NAME}</h1>        
-        <div>
-            <label>Jira URL: </label>
-            <input type="text" value={jiraAuth.jiraBaseUrl} onChange={(e) => setJiraAuth({...jiraAuth, jiraBaseUrl: e.target.value})} />
-        </div>
-        <div>
-            <label>Username: </label>
-            <input type="text" value={jiraAuth.username} onChange={(e) => setJiraAuth({...jiraAuth, username: e.target.value})} />
-        </div>
-        <div>
-            <label>API Token: </label>
-            <input type="text" value={jiraAuth.apiToken} onChange={(e) => setJiraAuth({...jiraAuth, apiToken: e.target.value})} />
-        </div>
-        <div>
-            <label>Project: </label>
-            <select value={projectKey} onChange={(e) => setProjectKey(e.target.value)}>
+        <section id="jiraAuth">
+            <div className="section-content" style={{display: authSectionExpanded ? 'block' : 'none'}}>
+                <div className="form-group">
+                    <label htmlFor="jiraBaseUrl">Jira URL: </label>
+                    <input type="text" id="jiraBaseUrl" value={jiraAuth.jiraBaseUrl} onChange={(e) => setJiraAuth({...jiraAuth, jiraBaseUrl: e.target.value})} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="username">Username: </label>
+                    <input type="text" id="username" value={jiraAuth.username} onChange={(e) => setJiraAuth({...jiraAuth, username: e.target.value})} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="apiToken">API Token: </label>
+                    <input type="text" id="apiToken" value={jiraAuth.apiToken} onChange={(e) => setJiraAuth({...jiraAuth, apiToken: e.target.value})} />
+                </div>
+            </div>
+            <div className="section-heading" onClick={() => setAuthSectionExpanded(!authSectionExpanded)}>{authSectionExpanded ? 'Hide' : 'Show'} Jira Authentication *</div>
+            <span>* Note: API Token expires often, so you may need to refresh the page to get a new one.</span>
+        </section>
+        <div className="form-group">
+            <label htmlFor="projectKey">Project: </label>
+            <select id="projectKey" value={projectKey} onChange={(e) => setProjectKey(e.target.value)}>
                 <option value="">Select Project</option>
                 {jiraProjects.map((project) => (
                     <option key={project.key} value={project.key}>{project.name}</option>
                 ))}
             </select>
         </div>
-        <div>
-            <label>Unreleased Versions: </label>
-            <select value={fixVersion} onChange={(e) => setVersion(e.target.value)}>
+        <div className="form-group">
+            <label htmlFor="fixVersion">Unreleased Versions: </label>
+            <select id="fixVersion" value={fixVersion} onChange={(e) => setVersion(e.target.value)}>
                 <option value="">Select Version</option>
                 {jiraVersionsFiltered.map((version) => (
                     <option key={version.id} value={version.id}>{version.name}</option>
                 ))}
             </select>
-            <label>Unreleased Only: </label>
-            <input type="checkbox" checked={unreleasedOnly} onChange={(e) => setUnreleasedOnly(e.target.checked)} />
         </div>
-        <div>
-            <label>Show Ticket Number: </label>
-            <input type="checkbox" checked={showTicketNumber} onChange={(e) => setShowTicketNumber(e.target.checked)} />
+        <div className="form-group">
+            <input type="checkbox" id="unreleasedOnly" checked={unreleasedOnly} onChange={(e) => setUnreleasedOnly(e.target.checked)} />
+            <label htmlFor="unreleasedOnly">Unreleased Only</label>
+        </div>
+        <div className="form-group">
+            <input type="checkbox" id="showTicketNumber" checked={showTicketNumber} onChange={(e) => setShowTicketNumber(e.target.checked)} />
+            <label htmlFor="showTicketNumber">Show Ticket Number</label>
         </div>
         <div>
             <label>Tickets: </label>

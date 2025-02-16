@@ -81,7 +81,6 @@ export class JiraClient {
             });
             console.log(`Response: ${JSON.stringify(response)}`);
             const issues: Issue[] = response.data.issues;
-            console.log(`______________________________ Issues: ${JSON.stringify(issues)} ______________________________`);
             return issues.filter(issue => issue.fields.issuetype.name.toLowerCase() !== 'task');
         } catch (error) {
             console.error("Error getting tickets:", error);
