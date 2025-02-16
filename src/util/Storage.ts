@@ -52,6 +52,48 @@ export const LOCAL_STORAGE: IStorage = {
   }
 };
 
+export const ELECTRON_KEY_VALUE_STORAGE: IStorage | any = {
+  FILE_NAME: 'userData/electron-key-value-storage.json',
+
+  storageGet<T>(key: string): T | null {
+    const theWindow = window as any;
+
+    if(typeof theWindow === 'undefined' || !theWindow.fileAPI) {
+      console.warn(`Can't access fileAPI. Not in a electron environment.`);
+      return null;
+    }
+    
+    try {
+      const keyValuePairs = theWindow.fileAPI.readJSONSync(this.FILE_NAME);
+      console.log(`Read in the json file: ${(keyValuePairs ? JSON.stringify(keyValuePairs) : 'null')}`);
+      const returnValue = keyValuePairs ? keyValuePairs[key] : null;
+      console.log(`Returning: ${(returnValue ? JSON.stringify(returnValue) : 'null')}`);
+      return returnValue;
+    } catch (error) {
+      console.error(`Error reading fileAPI key "${key}":`, error);
+      return null;
+    }
+  },
+
+  storageSet<T>(key: string, value: T): void {
+    const theWindow = window as any;
+    let keyValuePairs: any = null;
+
+    if(typeof theWindow === 'undefined' || !theWindow.fileAPI) {
+      console.warn(`Can't access fileAPI. Not in a electron environment.`);
+      return;
+    }
+    
+    try {
+      keyValuePairs = theWindow.fileAPI.readJSONSync(this.FILE_NAME) || {};
+      keyValuePairs[key] = value;
+      theWindow.fileAPI.saveJSONSync(this.FILE_NAME, keyValuePairs);
+    } catch (error) {
+      console.error(`Error saving fileAPI key "${key}":`, error);
+    }
+  }
+};
+
 /**
  * Implementation of IStorage that uses sessionStorage.
  */
@@ -97,6 +139,7 @@ export function useStorage<T>(storage: IStorage,key: string, initialValue: T ):
   // Lazily initialize state from the specified storage.
   const [storedValue, setStoredValue] = useState<T>(() => {
     const item = storage.storageGet<T>(key);
+    console.log(`Initial value: ${(item !== null ? JSON.stringify(item) : 'null')}`);
     return item !== null ? item : initialValue;
   });
 

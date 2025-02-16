@@ -1,4 +1,5 @@
-import { promises as fs } from 'fs';
+import { promises as fsAsync } from 'fs';
+import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 
@@ -24,12 +25,35 @@ interface FileAPI {
    * @returns A promise that resolves with true if deletion was successful.
    */
   deleteJSON: (filePath: string) => Promise<boolean>;
+
+  /**
+   * Reads a JSON file from the given file path in a synchronous manner.
+   * @param filePath The path to the JSON file.
+   * @returns The parsed JSON data.
+   */
+  readJSONSync: (filePath: string) => any;
+
+  /**
+   * Saves data as JSON to the given file path in a synchronous manner.
+   * @param filePath The path to save the JSON file.
+   * @param data The data to save.
+   * @returns true if saving was successful.
+   */
+  saveJSONSync: (filePath: string, data: any) => boolean;
+
+  /**
+   * Deletes a JSON file at the given file path in a synchronous manner.
+   * @param filePath The path to the JSON file to delete.
+   * @returns true if deletion was successful.
+   */
+  deleteJSONSync: (filePath: string) => boolean;
 }
 
 export const fileAPI: FileAPI = {
+  // Async implementations
   readJSON: async (filePath: string): Promise<any> => {
     try {
-      const data = await fs.readFile(filePath, 'utf-8');
+      const data = await fsAsync.readFile(filePath, 'utf-8');
       return JSON.parse(data);
     } catch (error) {
       // Optionally, log the error or handle it accordingly
@@ -45,7 +69,7 @@ export const fileAPI: FileAPI = {
       // Create directory path if it doesn't exist
       const dirPath = path.dirname(filePath);
       if (dirPath) {
-        await fs.mkdir(dirPath, { recursive: true });
+        await fsAsync.mkdir(dirPath, { recursive: true });
       }
 
       // Create a temporary file in the same directory
@@ -55,16 +79,16 @@ export const fileAPI: FileAPI = {
       );
 
       // Write to temporary file
-      await fs.writeFile(tmpFile, jsonStr, 'utf-8');
+      await fsAsync.writeFile(tmpFile, jsonStr, 'utf-8');
       
       // Atomically rename temporary file to target file
-      await fs.rename(tmpFile, filePath);
+      await fsAsync.rename(tmpFile, filePath);
       
       return true;
     } catch (error) {
       if (tmpFile) {
         try {
-          await fs.unlink(tmpFile);
+          await fsAsync.unlink(tmpFile);
         } catch {
           // Ignore cleanup errors
         }
@@ -75,12 +99,60 @@ export const fileAPI: FileAPI = {
 
   deleteJSON: async (filePath: string): Promise<boolean> => {
     try {
-      await fs.unlink(filePath);
+      await fsAsync.unlink(filePath);
       return true;
     } catch (error) {
       throw new Error(`Failed to delete JSON file at ${filePath}: ${error}`);
     }
   },
+
+  // Sync implementations
+  readJSONSync: (filePath: string): any => {
+    try {
+      const data = fs.readFileSync(filePath, 'utf-8');
+      return JSON.parse(data);
+    } catch (error) {
+      throw new Error(`Failed to read JSON file at ${filePath}: ${error}`);
+    }
+  },
+
+  saveJSONSync: (filePath: string, data: any): boolean => {
+    let tmpFile = '';
+    try {
+      const jsonStr = JSON.stringify(data, null, 2);
+      const dirPath = path.dirname(filePath);
+      if (dirPath) {
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+
+      tmpFile = path.join(
+        path.dirname(filePath),
+        `.${path.basename(filePath)}.${crypto.randomBytes(6).toString('hex')}.tmp`
+      );
+
+      fs.writeFileSync(tmpFile, jsonStr, 'utf-8');
+      fs.renameSync(tmpFile, filePath);
+      return true;
+    } catch (error) {
+      if (tmpFile) {
+        try {
+          fs.unlinkSync(tmpFile);
+        } catch {
+          // Ignore cleanup errors
+        }
+      }
+      throw new Error(`Failed to write JSON file at ${filePath}: ${error}`);
+    }
+  },
+
+  deleteJSONSync: (filePath: string): boolean => {
+    try {
+      fs.unlinkSync(filePath);
+      return true;
+    } catch (error) {
+      throw new Error(`Failed to delete JSON file at ${filePath}: ${error}`);
+    }
+  }
 };
 
 export default fileAPI;

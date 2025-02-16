@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "vite",
     "build-web": "tsc -b && vite build",
-    "build-android": "npx cap sync android && npx cap open android",
-    "build-ios": "npx cap sync ios && npx cap open ios",
+    "build-android": "tsc -b && vite build &&npx cap sync android && npx cap open android",
+    "build-ios": "tsc -b && vite build &&npx cap sync ios && npx cap open ios",
     "build-electron-linux": "tsc -b && BUILD_TARGET=electron vite build && tsc -b tsconfig.electron.json && npx electron-builder --linux",
     "electron": "electron . --enable-logging",
     "dev-electron": "tsc -b && BUILD_TARGET=electron vite build && tsc -b tsconfig.electron.json && electron .",

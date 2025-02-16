@@ -3,7 +3,9 @@ import Page2 from './Page2';
 import { useNavigate } from 'react-router-dom';
 import JiraClient from './jiraint/JiraClient';
 import { JiraAuth } from './jiraint/JiraAuth';
-import { useStorage, LOCAL_STORAGE } from './util/Storage';
+import { useStorage, LOCAL_STORAGE, ELECTRON_KEY_VALUE_STORAGE } from './util/Storage';
+import { environmentCheck } from './util/EnvironmentHelper';
+
 const PAGE_NAME = 'Page1';
 const PAGE_PATH = '/page1';
 
@@ -11,29 +13,16 @@ export function Page1() {
     const [tickets, setTickets] = useState<any[]>([]);
     const [fixVersion, setFixVersion] = useState<string>('');
     const [projectKey, setProjectKey] = useState<string>('');
-    const [testVar, setTestVar] = useState<string>('');
     const [error, setError] = useState<string>('');
-    const [jiraAuth, setJiraAuth] = useStorage<JiraAuth>(LOCAL_STORAGE, 'jiraAuth', {
+    const [jiraAuth, setJiraAuth] = useStorage<JiraAuth>(environmentCheck.isElectron ? ELECTRON_KEY_VALUE_STORAGE : LOCAL_STORAGE, 'jiraAuth', {
         jiraBaseUrl: '',
         username: '',
         apiToken: ''
     });
 
     useEffect(() => {
-        const bridge = (window as any).fileAPI;
-        if(bridge) {
-        const myJson = {name: "amanda", age: 30};
-        bridge.saveJSON('some/folder/myJson.json', myJson).then((result: boolean) => {
-            console.log(result);
-            bridge.readJSON('some/folder/myJson.json').then((result: any) => {
-                console.log(result);
-                    setTestVar(result.name);
-                });
-            });
-        } else {
-            setTestVar('No bridge');
-        }
-    }, []);
+        console.log(`jiraAuth: ${JSON.stringify(jiraAuth)}`);
+    }, [jiraAuth]);
 
     const navigate = useNavigate();
     const jiraClientRef = useRef<JiraClient>(new JiraClient(jiraAuth));
@@ -58,17 +47,7 @@ export function Page1() {
 
     return (
     <div>
-        <h1>{PAGE_NAME}</h1>
-        <div>
-            <label>Node: </label>
-            <span>{testVar || 'N/A'}</span>
-            <button onClick={() => {
-                const bridge = (window as any).fileAPI;
-                bridge.deleteJSON('some/folder/myJson.json').then((_: boolean) => {
-                    console.log('deleted');
-                });
-            }}>Delete</button>
-        </div>
+        <h1>{PAGE_NAME}</h1>        
         <div>
             <label>Jira URL: </label>
             <input type="text" value={jiraAuth.jiraBaseUrl} onChange={(e) => setJiraAuth({...jiraAuth, jiraBaseUrl: e.target.value})} />
