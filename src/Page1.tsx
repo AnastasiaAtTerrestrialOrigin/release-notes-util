@@ -105,7 +105,7 @@ export function Page1() {
                 </div>
             </div>
             <div className="section-heading" onClick={() => setAuthSectionExpanded(!authSectionExpanded)}>{authSectionExpanded ? 'Hide' : 'Show'} Jira Authentication *</div>
-            <span>* Note: API Token expires often, so you may need to refresh the page to get a new one.</span>
+            <span>* Note: API Token expires often, if you get errors, try going to JIRA and getting a new one.</span>
         </section>
         <div className="form-group">
             <label htmlFor="projectKey">Project: </label>
