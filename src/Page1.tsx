@@ -3,8 +3,8 @@ import Page2 from './Page2';
 import { useNavigate } from 'react-router-dom';
 import JiraClient from './jiraint/JiraClient';
 import { JiraAuth } from './jiraint/JiraAuth';
-import { useStorage, LOCAL_STORAGE, ELECTRON_KEY_VALUE_STORAGE } from './util/Storage';
-import { environmentCheck } from './util/EnvironmentHelper';
+import { useStorage, LOCAL_STORAGE, ELECTRON_KEY_VALUE_STORAGE } from 'terrestrial-util';
+import { environmentCheck } from 'terrestrial-util';
 import { Project } from './jiraint/Project';
 import Version from './jiraint/Version';
 import { Issue } from './jiraint/Issue';
@@ -36,13 +36,24 @@ export function Page1() {
         jiraClientRef.current = new JiraClient(jiraAuth);
         if(jiraAuth) {
             const jiraClient = new JiraClient(jiraAuth);
+            console.log('Fetching projects...');
             jiraClient.getProjects().then((projects) => {
+                console.log('Got projects response:', projects);
                 setJiraProjects(projects);
+            }).catch(err => {
+                console.error('Error fetching projects:', err);
+                setError('Failed to fetch projects');
             });
         }
     }, [jiraAuth]);
 
     useEffect(() => {
+        console.log('jiraProjects changed:', {
+            value: jiraProjects,
+            type: typeof jiraProjects,
+            isArray: Array.isArray(jiraProjects),
+            length: jiraProjects?.length
+        });
         if(jiraProjects && projectKey) {
             const jiraClient = new JiraClient(jiraAuth);
             jiraClient.getVersions(projectKey).then((versions) => {   
@@ -111,16 +122,19 @@ export function Page1() {
             <label htmlFor="projectKey">Project: </label>
             <select id="projectKey" value={projectKey} onChange={(e) => setProjectKey(e.target.value)}>
                 <option value="">Select Project</option>
-                {jiraProjects.map((project) => (
-                    <option key={project.key} value={project.key}>{project.name}</option>
-                ))}
+                {(Array.isArray(jiraProjects) && jiraProjects.length > 0) ? 
+                    jiraProjects.map((project) => (
+                        <option key={project.key} value={project.key}>{project.name}</option>
+                    ))
+                    : <option value="" disabled>No projects available</option>
+                }
             </select>
         </div>
         <div className="form-group">
             <label htmlFor="fixVersion">Unreleased Versions: </label>
             <select id="fixVersion" value={fixVersion} onChange={(e) => setVersion(e.target.value)}>
                 <option value="">Select Version</option>
-                {jiraVersionsFiltered.map((version) => (
+                {jiraVersionsFiltered?.map((version) => (
                     <option key={version.id} value={version.id}>{version.name}</option>
                 ))}
             </select>

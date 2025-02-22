@@ -7,6 +7,7 @@ import { Issue } from './Issue';
 // and the real URL in production (or a native environment)
 // const isDev = import.meta.env.DEV;
 // const jiraBaseUrl = isDev ? '/jira' : 'https://terrestrialorigin.atlassian.net';
+const isDev = import.meta.env.DEV;
 const projectKey = 'RWCA';
 
 export class JiraClient {
@@ -16,8 +17,17 @@ export class JiraClient {
         this.jiraAuth = jiraAuth;
     }
 
+    private getBaseUrl(): string {
+        // In development, use the proxy
+        if (isDev) {
+            return '/jira';
+        }
+        // In production or Electron, use the actual URL
+        return this.jiraAuth.jiraBaseUrl;
+    }
+
     async getProjects(): Promise<Project[]> {
-        const url = `${this.jiraAuth.jiraBaseUrl}/rest/api/2/project`;
+        const url = `${this.getBaseUrl()}/rest/api/2/project`;
         try {
             const response = await Http.get({
                 url,
@@ -34,7 +44,7 @@ export class JiraClient {
     }
 
     async getVersions(projectKey: string): Promise<Version[]> {
-        const url = `${this.jiraAuth.jiraBaseUrl}/rest/api/2/project/${projectKey}/versions`;
+        const url = `${this.getBaseUrl()}/rest/api/2/project/${projectKey}/versions`;
         try {
             const response = await Http.get({
                 url,
@@ -66,7 +76,7 @@ export class JiraClient {
     async getTickets(fixVersion: string): Promise<Issue[]> {
         const jql = `project = ${projectKey} AND status = Done AND fixVersion = "${fixVersion}"`;
         console.log(`JQL: ${jql}`);
-        const url = `${this.jiraAuth.jiraBaseUrl}/rest/api/2/search`;
+        const url = `${this.getBaseUrl()}/rest/api/2/search`;
         console.log(`URL: ${url}`);
         try {
             const response = await Http.get({
