@@ -3,8 +3,9 @@ import Page2 from './Page2';
 import { useNavigate } from 'react-router-dom';
 import JiraClient from './jiraint/JiraClient';
 import { JiraAuth } from './jiraint/JiraAuth';
-import { useStorage, LOCAL_STORAGE, ELECTRON_KEY_VALUE_STORAGE } from 'terrestrial-util';
+import { useStorage, LOCAL_STORAGE } from 'terrestrial-util';
 import { environmentCheck } from 'terrestrial-util';
+import { ELECTRON_KEY_VALUE_STORAGE } from 'terrestrial-util-electron';
 import { Project } from './jiraint/Project';
 import Version from './jiraint/Version';
 import { Issue } from './jiraint/Issue';
@@ -15,6 +16,7 @@ const PAGE_PATH = '/page1';
 import './theme.css';
 
 export function Page1() {
+    const storageType = environmentCheck.isElectron ? ELECTRON_KEY_VALUE_STORAGE : LOCAL_STORAGE;
     const [tickets, setTickets] = useState<Issue[]>([]);
     const [fixVersion, setFixVersion] = useState<string>('');
     const [projectKey, setProjectKey] = useState<string>('');
@@ -25,7 +27,7 @@ export function Page1() {
     const [showTicketNumber, setShowTicketNumber] = useState<boolean>(true);
     const [authSectionExpanded, setAuthSectionExpanded] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
-    const [jiraAuth, setJiraAuth] = useStorage<JiraAuth>(environmentCheck.isElectron ? ELECTRON_KEY_VALUE_STORAGE : LOCAL_STORAGE, 'jiraAuth', {
+    const [jiraAuth, setJiraAuth] = useStorage<JiraAuth>(storageType, 'jiraAuth', {
         jiraBaseUrl: '',
         username: '',
         apiToken: ''
