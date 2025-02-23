@@ -26,7 +26,7 @@ export function Page1() {
     const [jiraVersionsAll, setJiraVersionsAll] = useState<Version[]>([]);
     const [jiraVersionsFiltered, setJiraVersionsFiltered] = useState<Version[]>([]);
     const [unreleasedOnly, setUnreleasedOnly] = useState<boolean>(true);
-    const [showTicketNumber, setShowTicketNumber] = useState<boolean>(true);
+    const [showTicketNumber, setShowTicketNumber] = useState<boolean>(false);
     const [authSectionExpanded, setAuthSectionExpanded] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
     const [jiraAuth, setJiraAuth] = useStorage<JiraAuth>(storageType, 'jiraAuth', {
@@ -36,6 +36,7 @@ export function Page1() {
     });
     const [ templatePreview, setTemplatePreview ] = useState<string>("");
     const [ mergeFields, setMergeFields ] = useState<Map<string, string>>(new Map());
+    const [ autoFilledMergeFields, setAutoFilledMergeFields ] = useState<string[]>([]);
 
     useEffect(() => {
         console.log(`jiraAuth: ${JSON.stringify(jiraAuth)}`);
@@ -80,10 +81,19 @@ export function Page1() {
             const templateText = storageType.storageGet('templateText' + projectKey);
             if(templateText) {
                 const mergeFields = extractMergeFields(templateText);
-                mergeFields.set("tickets", tickets.map((ticket) => renderTicketContent(ticket)).join('\n* '));
+                if(tickets?.length > 0) {
+                    autoFilledMergeFields.push("tickets");
+                    mergeFields.set("tickets", "\n* " + tickets.map((ticket) => renderTicketContent(ticket)).join('\n* '));
+                }
                 const version = jiraVersionsFiltered.find((version) => version.id === fixVersion);
-                mergeFields.set("fixVersion", version?.name || '');
-                mergeFields.set("releaseDate", version?.releaseDate ? new Date(version.releaseDate).toLocaleDateString() : '');
+                if(version) {
+                    autoFilledMergeFields.push("fixVersion");
+                    mergeFields.set("fixVersion", version?.name || '');
+                    if(version?.releaseDate) {
+                        autoFilledMergeFields.push("releaseDate");
+                        mergeFields.set("releaseDate", version?.releaseDate ? new Date(version.releaseDate).toLocaleDateString() : '');
+                    }
+                }
                 setMergeFields(mergeFields);                
             }
         }
@@ -198,10 +208,12 @@ export function Page1() {
         <div>
             <label>Merge Fields: </label>
             {Array.from(mergeFields.entries()).map(([key, value]) => (
-                <div className="form-group">
-                    <label htmlFor={key}>{key}: </label>
-                    <input type="text" id={key} value={value} onChange={(e) => setMergeFields({...mergeFields, [key]: e.target.value})} />
-                </div>
+                autoFilledMergeFields.includes(key) ? null : (
+                    <div className="form-group">
+                        <label htmlFor={key}>{key}: </label>
+                        <input type="text" id={key} value={value} onChange={(e) => setMergeFields({...mergeFields, [key]: e.target.value})} />
+                    </div>
+                )
             ))}
         </div>
         {templatePreview &&
