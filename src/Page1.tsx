@@ -93,6 +93,10 @@ export function Page1() {
                         autoFilledMergeFields.push("releaseDate");
                         mergeFields.set("releaseDate", version?.releaseDate ? new Date(version.releaseDate).toLocaleDateString() : '');
                     }
+                    if(version?.plannedReleaseDate) {
+                        autoFilledMergeFields.push("plannedReleaseDate");
+                        mergeFields.set("plannedReleaseDate", version?.plannedReleaseDate ? new Date(version.plannedReleaseDate).toLocaleDateString() : '');
+                    }
                 }
                 setMergeFields(mergeFields);                
             }

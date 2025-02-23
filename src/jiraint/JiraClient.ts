@@ -52,14 +52,22 @@ export class JiraClient {
                     Authorization: 'Basic ' + btoa(`${this.jiraAuth.username}:${this.jiraAuth.apiToken}`)
                 }
             });
-            
+
+            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            console.log(`Versions: `, response.data);
+            console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             return response.data
                 .filter((version: any) => !version.archived)
                 .map((version: any): Version => ({
                     id: version.id,
                     name: version.name,
                     released: version.released,
-                    releaseDate: version.releaseDate
+                    releaseDate: version.releaseDate,
+                    plannedReleaseDate: version.userReleaseDate,
+                    startDate: version.startDate,
+                    jiraLink: version.self,
+                    description: version.description,
+                    archived: version.archived
                 }))
                 .sort((a: Version, b: Version) => {
                     // Sort by release date descending (newest first)
