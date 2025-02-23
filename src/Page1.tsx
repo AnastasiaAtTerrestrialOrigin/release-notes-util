@@ -81,24 +81,26 @@ export function Page1() {
             const templateText = storageType.storageGet('templateText' + projectKey);
             if(templateText) {
                 const mergeFields = extractMergeFields(templateText);
+                const newAutoFilledMergeFields: string[] = [];
                 if(tickets?.length > 0) {
-                    autoFilledMergeFields.push("tickets");
+                    newAutoFilledMergeFields.push("tickets");
                     mergeFields.set("tickets", "\n* " + tickets.map((ticket) => renderTicketContent(ticket)).join('\n* '));
                 }
                 const version = jiraVersionsFiltered.find((version) => version.id === fixVersion);
                 if(version) {
-                    autoFilledMergeFields.push("fixVersion");
+                    newAutoFilledMergeFields.push("fixVersion");
                     mergeFields.set("fixVersion", version?.name || '');
                     if(version?.releaseDate) {
-                        autoFilledMergeFields.push("releaseDate");
+                        newAutoFilledMergeFields.push("releaseDate");
                         mergeFields.set("releaseDate", version?.releaseDate ? new Date(version.releaseDate).toLocaleDateString() : '');
                     }
                     if(version?.plannedReleaseDate) {
-                        autoFilledMergeFields.push("plannedReleaseDate");
+                        newAutoFilledMergeFields.push("plannedReleaseDate");
                         mergeFields.set("plannedReleaseDate", version?.plannedReleaseDate ? new Date(version.plannedReleaseDate).toLocaleDateString() : '');
                     }
                 }
-                setMergeFields(mergeFields);                
+                setMergeFields(mergeFields);
+                setAutoFilledMergeFields(newAutoFilledMergeFields);
             }
         }
     }, [projectKey, fixVersion, tickets])
@@ -215,7 +217,10 @@ export function Page1() {
                 autoFilledMergeFields.includes(key) ? null : (
                     <div className="form-group">
                         <label htmlFor={key}>{key}: </label>
-                        <input type="text" id={key} value={value} onChange={(e) => setMergeFields({...mergeFields, [key]: e.target.value})} />
+                        <input type="text" id={key} value={value} onChange={(e) => {
+                            mergeFields.set(key, e.target.value);
+                            setMergeFields(new Map(mergeFields));
+                        }} />
                     </div>
                 )
             ))}
