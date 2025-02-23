@@ -9,6 +9,8 @@ import { ELECTRON_KEY_VALUE_STORAGE } from 'terrestrial-util-electron';
 import { Project } from './jiraint/Project';
 import Version from './jiraint/Version';
 import { Issue } from './jiraint/Issue';
+import fillTemplate, { extractMergeFields } from './TemplateFiller';
+import { Preview } from './Preview';
 
 const PAGE_NAME = 'Jira Ticket Search';
 const PAGE_PATH = '/page1';
@@ -32,6 +34,8 @@ export function Page1() {
         username: '',
         apiToken: ''
     });
+    const [ templatePreview, setTemplatePreview ] = useState<string>("");
+    const [ mergeFields, setMergeFields ] = useState<Map<string, string>>(new Map());
 
     useEffect(() => {
         console.log(`jiraAuth: ${JSON.stringify(jiraAuth)}`);
@@ -63,6 +67,27 @@ export function Page1() {
             });
         }
     }, [jiraProjects, projectKey]);
+    
+    useEffect(() => {
+        if(mergeFields && projectKey) {
+            const templateText = storageType.storageGet('templateText' + projectKey);            
+            setTemplatePreview(fillTemplate(templateText, mergeFields));
+        }
+    }, [mergeFields, projectKey])
+
+    useEffect(() => {
+        if(projectKey && fixVersion && tickets) {
+            const templateText = storageType.storageGet('templateText' + projectKey);
+            if(templateText) {
+                const mergeFields = extractMergeFields(templateText);
+                mergeFields.set("tickets", tickets.map((ticket) => renderTicketContent(ticket)).join('\n* '));
+                const version = jiraVersionsFiltered.find((version) => version.id === fixVersion);
+                mergeFields.set("fixVersion", version?.name || '');
+                mergeFields.set("releaseDate", version?.releaseDate ? new Date(version.releaseDate).toLocaleDateString() : '');
+                setMergeFields(mergeFields);                
+            }
+        }
+    }, [projectKey, fixVersion, tickets])
 
     useEffect(() => {
         if(jiraVersionsAll) {
@@ -96,8 +121,15 @@ export function Page1() {
     
 
     const handleClick = useCallback(() => {
-        navigate(Page2.path);
-    }, [navigate]);
+        navigate(Page2.path.replace(':projectKey', projectKey));
+    }, [navigate, projectKey]);
+
+    const renderTicketContent = (ticket: Issue) => {
+        const ticketNumber = showTicketNumber ? `${ticket.key} - ` : '';
+        const summary = ticket.fields.summary;
+        const type = ticket.fields.issuetype.name.toLowerCase() === "bug" ? "Bug" : "Enhancement";
+        return `${ticketNumber}${summary} (${type})`;
+    };
 
     return (
     <div className="container">
@@ -153,7 +185,7 @@ export function Page1() {
             <label>Tickets: </label>
             <ul>
                 {tickets.map((ticket) => (
-                    <li key={ticket.key}>{showTicketNumber ? `${ticket.key} - ` : ''}{ticket.fields.summary} ({ticket.fields.issuetype.name.toLowerCase() === "bug" ? "Bug" : "Enhancement"})</li>
+                    <li key={ticket.key}>{renderTicketContent(ticket)}</li>
                 ))}
             </ul>
         </div>  
@@ -163,7 +195,21 @@ export function Page1() {
                 <span>{error}</span>
             </div>
         )}
-        <button onClick={handleClick}>Go to Page2</button>
+        <div>
+            <label>Merge Fields: </label>
+            {Array.from(mergeFields.entries()).map(([key, value]) => (
+                <div className="form-group">
+                    <label htmlFor={key}>{key}: </label>
+                    <input type="text" id={key} value={value} onChange={(e) => setMergeFields({...mergeFields, [key]: e.target.value})} />
+                </div>
+            ))}
+        </div>
+        {templatePreview &&
+            <Preview label="Preview">{templatePreview}</Preview>
+        }
+        {projectKey &&
+            <button onClick={handleClick}>Edit templates for project {projectKey}</button>
+        }
     </div>
     );
 }

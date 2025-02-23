@@ -1,7 +1,18 @@
+:root {
+  --color-primary: #2d6cdf;
+  --color-primary-dark: #245bb5;
+  --color-background: #f0f4f8;
+  --color-surface: #fff;
+  --color-text: #333;
+  --color-text-secondary: #444;
+  --color-border: #ccc;
+  --color-shadow: rgba(0, 0, 0, 0.1);
+}
+
 body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    background-color: #f0f4f8;
-    color: #333;
+    background-color: var(--color-background);
+    color: var(--color-text);
     margin: 0;
     padding: 0;
     width: 100%;
@@ -11,21 +22,21 @@ body {
     width: 100%;
     max-width: 600px;  /* This will cap the width at 1500px while allowing shrinking */
     margin: 20px auto;
-    background: #fff;
+    background: var(--color-surface);
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px var(--color-shadow);
     padding: 20px;
   }
 
   h1 {
     font-size: 2em;
     margin-bottom: 0.2em;
-    color: #2d6cdf;
+    color: var(--color-primary);
   }
   h2 {
     font-size: 1.5em;
     margin-top: 0;
-    color: #444;
+    color: var(--color-text-secondary);
   }
   p {
     font-size: 1em;
@@ -54,10 +65,10 @@ body {
   input[type="checkbox"] {
     margin: 0;
   }
-  input[type="text"], select {
+  input[type="text"], select, textarea {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--color-border);
     border-radius: 4px;
     font-size: 1em;
     box-sizing: border-box;
@@ -72,8 +83,8 @@ body {
     text-align: center;
   }
   button, .section-heading {
-    background-color: #2d6cdf;
-    color: #fff;
+    background-color: var(--color-primary);
+    color: var(--color-surface);
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -81,14 +92,14 @@ body {
     transition: background-color 0.2s ease-in-out;
   }
   button:hover, .section-heading:hover {
-    background-color: #245bb5;
+    background-color: var(--color-primary-dark);
   }
   section {
     margin-bottom: 1ex;
   }
   .tabs {
     display: flex;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid var(--color-border);
     margin-top: 20px;
   }
   .tab {
@@ -101,9 +112,9 @@ body {
     transition: background-color 0.2s ease-in-out;
   }
   .tab.active {
-    border: 1px solid #ccc;
+    border: 1px solid var(--color-border);
     border-bottom: none;
-    background-color: #fff;
+    background-color: var(--color-surface);
     font-weight: bold;
   }
   .tab:not(.active):hover {
