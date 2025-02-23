@@ -6,6 +6,7 @@ import { environmentCheck } from 'terrestrial-util';
 import { ELECTRON_KEY_VALUE_STORAGE } from 'terrestrial-util-electron';
 import { LOCAL_STORAGE } from 'terrestrial-util';
 import { useStorage } from 'terrestrial-util';
+
 const PAGE_NAME = 'Templates';
 const PAGE_PATH = '/page2/:projectKey';
 
@@ -33,7 +34,7 @@ export function Page2() {
             <Preview label="Preview">{templateText}</Preview>
         </section>
 
-        <button onClick={handleClick}>Go to Page1</button>
+        <button onClick={handleClick}>Go to {Page1.displayName}</button>
     </div>
     );
 }

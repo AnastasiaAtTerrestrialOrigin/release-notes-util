@@ -12,7 +12,7 @@ import { Issue } from './jiraint/Issue';
 import fillTemplate, { extractMergeFields } from './TemplateFiller';
 import { Preview } from './Preview';
 
-const PAGE_NAME = 'Jira Ticket Search';
+const PAGE_NAME = 'Release Notes (JIRA Edition)';
 const PAGE_PATH = '/page1';
 
 import './theme.css';
