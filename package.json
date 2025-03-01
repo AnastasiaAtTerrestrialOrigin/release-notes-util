@@ -44,12 +44,12 @@
     "@capacitor/core": "^7.0.1",
     "@capacitor/ios": "^7.0.1",
     "axios": "^1.7.9",
+    "cross-platform-util": "^0.4.2",
+    "cross-platform-util-electron-preload": "^0.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.0.0",
-    "react-router-dom": "^7.1.5",
-    "terrestrial-util": "^0.1.1",
-    "terrestrial-util-electron": "^0.1.0"
+    "react-router-dom": "^7.1.5"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.0.1",
@@ -60,6 +60,7 @@
     "@types/react-dom": "^19.0.3",
     "@typescript-eslint/eslint-plugin": "^8.24.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "cross-platform-util-types": "^0.3.3",
     "electron": "^34.2.0",
     "electron-builder": "^25.1.8",
     "eslint": "^9.21.0",

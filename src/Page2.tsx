@@ -1,22 +1,20 @@
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import Page1 from './Page1';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Preview } from './Preview';
-import { environmentCheck } from 'terrestrial-util';
-import { ELECTRON_KEY_VALUE_STORAGE } from 'terrestrial-util-electron';
-import { LOCAL_STORAGE } from 'terrestrial-util';
-import { useStorage } from 'terrestrial-util';
+import { KeyValueStorageContext } from 'cross-platform-util';
+import { useKeyValueStorage } from 'cross-platform-util';
 
 const PAGE_NAME = 'Templates';
 const PAGE_PATH = '/page2/:projectKey';
 
 export function Page2() {
-    const storageType = environmentCheck.isElectron ? ELECTRON_KEY_VALUE_STORAGE : LOCAL_STORAGE;
+    const storageType = useContext(KeyValueStorageContext);
 
     const navigate = useNavigate();
     const { projectKey } = useParams(); 
 
-    const [templateText, setTemplateText] = useStorage<string>(storageType, 'templateText' + projectKey, '');
+    const [templateText, setTemplateText] = useKeyValueStorage<string>(storageType, 'templateText' + projectKey, '');
     
     const handleClick = useCallback(() => {
         navigate(Page1.path);

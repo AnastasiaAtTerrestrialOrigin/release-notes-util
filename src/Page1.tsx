@@ -1,16 +1,15 @@
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { useCallback, useRef, useState, useEffect, useContext } from 'react';
 import Page2 from './Page2';
 import { useNavigate } from 'react-router-dom';
 import JiraClient from './jiraint/JiraClient';
 import { JiraAuth } from './jiraint/JiraAuth';
-import { useStorage, LOCAL_STORAGE } from 'terrestrial-util';
-import { environmentCheck } from 'terrestrial-util';
-import { ELECTRON_KEY_VALUE_STORAGE } from 'terrestrial-util-electron';
 import { Project } from './jiraint/Project';
 import Version from './jiraint/Version';
 import { Issue } from './jiraint/Issue';
 import fillTemplate, { extractMergeFields } from './TemplateFiller';
 import { Preview } from './Preview';
+import { KeyValueStorageContext } from 'cross-platform-util';
+import { useKeyValueStorage } from 'cross-platform-util';
 
 const PAGE_NAME = 'Release Notes (JIRA Edition)';
 const PAGE_PATH = '/page1';
@@ -18,7 +17,8 @@ const PAGE_PATH = '/page1';
 import './theme.css';
 
 export function Page1() {
-    const storageType = environmentCheck.isElectron ? ELECTRON_KEY_VALUE_STORAGE : LOCAL_STORAGE;
+    const storageType = useContext(KeyValueStorageContext);
+    
     const [tickets, setTickets] = useState<Issue[]>([]);
     const [fixVersion, setFixVersion] = useState<string>('');
     const [projectKey, setProjectKey] = useState<string>('');
@@ -29,7 +29,7 @@ export function Page1() {
     const [showTicketNumber, setShowTicketNumber] = useState<boolean>(false);
     const [authSectionExpanded, setAuthSectionExpanded] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
-    const [jiraAuth, setJiraAuth] = useStorage<JiraAuth>(storageType, 'jiraAuth', {
+    const [jiraAuth, setJiraAuth] = useKeyValueStorage<JiraAuth>(storageType, 'jiraAuth', {
         jiraBaseUrl: '',
         username: '',
         apiToken: ''
@@ -71,14 +71,14 @@ export function Page1() {
     
     useEffect(() => {
         if(mergeFields && projectKey) {
-            const templateText = storageType.storageGet('templateText' + projectKey);            
-            setTemplatePreview(fillTemplate(templateText, mergeFields));
+            const templateText: string | null = storageType.storageGet('templateText' + projectKey);            
+            setTemplatePreview(fillTemplate(templateText || '', mergeFields));
         }
     }, [mergeFields, projectKey])
 
     useEffect(() => {
         if(projectKey && fixVersion && tickets) {
-            const templateText = storageType.storageGet('templateText' + projectKey);
+            const templateText: string | null = storageType.storageGet('templateText' + projectKey);
             if(templateText) {
                 const mergeFields = extractMergeFields(templateText);
                 const newAutoFilledMergeFields: string[] = [];
